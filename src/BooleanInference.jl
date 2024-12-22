@@ -5,7 +5,7 @@ using OptimalBranchingCore: AbstractProblem,select_variables,apply_branch
 using OptimalBranchingCore.BitBasis
 using GenericTensorNetworks
 using GenericTensorNetworks.OMEinsum
-import ProblemReductions: CircuitSAT,Circuit
+import ProblemReductions: CircuitSAT,Circuit,Factoring,reduceto
 # using GenericTensorNetworks: ∧, ∨, ¬
 
 # types
@@ -15,7 +15,7 @@ export BooleanInferenceProblem
 export BooleanResult
 
 # interface
-export cnf2bip,cir2bip,sat2bip,solvebip
+export cnf2bip,cir2bip,sat2bip,solvebip,factoring
 
 # reducer
 export DeductionReducer
