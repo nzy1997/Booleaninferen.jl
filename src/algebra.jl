@@ -3,16 +3,6 @@ struct BooleanResult{N,S,C}
     config::ConfigSampler{N,S,C}
 end
 
-# function Base.getfield(br::BooleanResult, name::Symbol)
-#     if name == :rs
-#         return br.rs
-#     elseif name == :config
-#         return br.config
-#     else
-#         # return 123
-#     end
-# end
-
 BooleanResult{N,S,C}(bs::ConfigSampler) where {N,S,C} = BooleanResult(Tropical(0.0), bs)
 
 BooleanResult(b::Bool, x::AbstractVector)  = BooleanResult(b,2,x)
@@ -37,7 +27,7 @@ end
 function Base.zero(::Type{BooleanResult{N,S,C}}) where {N,S,C}
     BooleanResult(Tropical(-Inf), ConfigSampler(StaticElementVector(2, fill(0, N))))
 end
-
+zero_count(::Type{BooleanResult{N,S,C}}) where {N,S,C} = zero(BooleanResult{N,S,C})
 struct BooleanResultBranchCount{N,S,C}
     rs::Tropical{Float64} # -inf stands for false, 0.0 stands for true
     config::ConfigSampler{N,S,C}
@@ -65,6 +55,7 @@ end
 function Base.zero(::Type{BooleanResultBranchCount{N,S,C}}) where {N,S,C}
     BooleanResultBranchCount(Tropical(-Inf), ConfigSampler(StaticElementVector(2, fill(0, N))),1)
 end
+zero_count(::Type{BooleanResultBranchCount{N,S,C}}) where {N,S,C} = BooleanResultBranchCount(Tropical(-Inf), ConfigSampler(StaticElementVector(2, fill(0, N))),0)
 
 BooleanResultBranchCount(b::Bool, x::AbstractVector)  = BooleanResultBranchCount(b,2,x)
 

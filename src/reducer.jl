@@ -3,11 +3,14 @@ struct DeductionReducer <: AbstractReducer end
 function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, ::DeductionReducer)
     he2v = copy(p.he2v)
 	tensors = copy(p.tensors)
-    
+    v2he = copy(p.v2he)
     data = fill(0, p.literal_num)
 	while true
         he2v, tensors = remove_zeros!(he2v, tensors)
         unitedge = findfirst(x -> count(==(Tropical(0.0)),x) == 1 ,tensors)
+        # @show unitedge
+        # @show tensors[unitedge]
+        # @show he2v[unitedge]
         isnothing(unitedge) && break
 		vs = he2v[unitedge]
         v_val = findfirst(==(Tropical(0.0)), tensors[unitedge])
@@ -17,8 +20,9 @@ function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, ::Deduc
             vs = vs[1]
         end
 		he2v, tensors, data = decide_literal!(he2v, tensors, vs, v_val, data)
+        # he2v, tensors, data,v2he = decide_literal!(he2v, tensors,v2he, vs, v_val, data)
 	end
-	return BooleanInferenceProblem(tensors, he2v, p.literal_num), BooleanResult(true, 2, data).config
+	return BooleanInferenceProblem(tensors, he2v,v2he, p.literal_num), BooleanResult(true, 2, data).config
 end
 
 function remove_zeros!(he2v, tensors)
@@ -88,4 +92,34 @@ function _vertex_in_edge(he2vi,dls::Vector{Int},new_vals::Vector{Int})
         end
     end
     return pos, vals
+end
+
+function _make_colon_vector(pos,vals,n::Int)
+    return [i ∈ pos ? vals[findfirst(==(i),pos)] : (:) for i in 1:n]
+end
+
+function decide_literal!(he2v, tensors, v2he, dls::Vector{Int}, new_vals::Vector{Int},data::Vector{Int})
+    # @show dls
+    # @show new_vals
+    # @show v2he
+    vedges = reduce(∪, [v2he[v] for v in dls])
+    # @show vedges
+    [v2he[v] = Int[] for v in dls]
+    # @show v2he
+	for edge_num in vedges
+        pos, vals = _vertex_in_edge(he2v[edge_num],dls,new_vals)
+        colon_vec = _make_colon_vector(pos,vals,length(he2v[edge_num]))
+        if length(pos) == length(he2v[edge_num])
+            tensors[edge_num] = [tensors[edge_num][colon_vec...]]
+        else
+            tensors[edge_num] = tensors[edge_num][colon_vec...]
+        end
+		he2v[edge_num] = setdiff(he2v[edge_num], dls)
+	end
+    data[dls] = new_vals .- 1
+	return he2v, tensors, data,v2he
+end
+
+function decide_literal!(he2v, tensors, v2he, dls::Int, new_vals::Int,data::Vector{Int})
+    return decide_literal!(he2v, tensors, v2he, [dls], [new_vals], data)
 end

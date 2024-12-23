@@ -50,8 +50,8 @@ function solvebip_count(sat::ConstraintSatisfactionProblem; bs::BranchingStrateg
 end
 
 function solve_factoring_count(p1::Int, p2::Int)
-    n = Int(ceil(log2(p1)))
-    m = Int(ceil(log2(p2)))
+    n = Int(ceil(log2(p1+1)))
+    m = Int(ceil(log2(p2+1)))
     N = p1*p2
     println("n = $n, m = $m, N = $N")
     return solve_factoring_count(n,m,N)

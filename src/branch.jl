@@ -25,11 +25,15 @@ function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem
 end
 
 function check_stopped(problem::BooleanInferenceProblem,result_type)
+    # if there is no clause, then the problem is solved.
     if isempty(problem.tensors)
+        # @show "here"
         return true, one(result_type)
     end
+    # if there is a clause with all -inf, then the problem is unsolvable.
 	if any([all(==(Tropical(-Inf)), t) for t in problem.tensors])
+        # @show "here2"
 		return true, zero(result_type)
 	end
-    return false, zero(result_type)
+    return false, zero_count(result_type)
 end
