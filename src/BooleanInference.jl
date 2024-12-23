@@ -10,13 +10,13 @@ import ProblemReductions: CircuitSAT,Circuit,Factoring,reduceto
 # using GenericTensorNetworks: ∧, ∨, ¬
 
 # types
-export BooleanInferenceProblem
+export BooleanInferenceProblem,BooleanResultBranchCount
 
 # algebra
 export BooleanResult
 
 # interface
-export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat
+export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat,solve_factoring_count
 
 # reducer
 export DeductionReducer

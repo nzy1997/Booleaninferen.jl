@@ -18,7 +18,7 @@ function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, ::Deduc
         end
 		he2v, tensors, data = decide_literal!(he2v, tensors, vs, v_val, data)
 	end
-	return BooleanInferenceProblem(tensors, he2v, p.literal_num), BooleanResult(true, 2, data)
+	return BooleanInferenceProblem(tensors, he2v, p.literal_num), BooleanResult(true, 2, data).config
 end
 
 function remove_zeros!(he2v, tensors)
@@ -40,7 +40,7 @@ function remove_literal(vertices::Vector{Int}, p::BooleanInferenceProblem, claus
         end
     end
     p_new = decide_literal(p, decided_v, data)
-    return p_new, BooleanResult(true, 2, data)
+    return p_new, BooleanResult(true, 2, data).config
 end
 
 function decide_literal(p::BooleanInferenceProblem, vertices::Vector{Int}, data::Vector{Int})

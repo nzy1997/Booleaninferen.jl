@@ -16,7 +16,7 @@ end
 
 function solvebip(sat::ConstraintSatisfactionProblem; bs::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
     p,syms = sat2bip(sat)
-    res = branch_and_reduce(p, bs, reducer)
+    res = branch_and_reduce(p, bs, reducer,typeof(BooleanResult(true, 2, fill(0,p.literal_num))))
     return get_answer(res,p.literal_num)
 end
 
@@ -31,4 +31,28 @@ end
 function solve_sat(sat::ConstraintSatisfactionProblem)
     res,vals = solvebip(sat)
     return res, Dict(zip(sat.symbols,vals))
+end
+
+
+function solve_factoring_count(n::Int, m::Int, N::Int)
+    fproblem = Factoring(m, n, N)
+    res = reduceto(CircuitSAT,fproblem)
+    ns,vals,count =  solvebip_count(res.circuit)
+    a, b = ProblemReductions.read_solution(fproblem, [vals[res.p]...,vals[res.q]...])
+    @show count
+    return a,b
+end
+
+function solvebip_count(sat::ConstraintSatisfactionProblem; bs::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
+    p,syms = sat2bip(sat)
+    res = branch_and_reduce(p, bs, reducer,typeof(BooleanResultBranchCount(true, 2, fill(0,p.literal_num))))
+    return get_answer(res,p.literal_num)
+end
+
+function solve_factoring_count(p1::Int, p2::Int)
+    n = Int(ceil(log2(p1)))
+    m = Int(ceil(log2(p2)))
+    N = p1*p2
+    println("n = $n, m = $m, N = $N")
+    return solve_factoring_count(n,m,N)
 end
