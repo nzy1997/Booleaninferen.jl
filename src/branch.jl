@@ -4,10 +4,11 @@ function OptimalBranchingCore.apply_branch(p::BooleanInferenceProblem, clause::C
     return p_new2, (res * res2)
 end
 
-function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem, config::BranchingStrategy, reducer::AbstractReducer,result_type)
+function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem, bs::AbstractBranchingStatus,config::BranchingStrategy, reducer::AbstractReducer,result_type)
     rp, reducedvalue = reduce_problem(problem, reducer)
-    stopped, res = check_stopped(rp,result_type) 
-    stopped && return res
+
+    stopped, res = check_stopped(bs)
+    stopped && return res, bs
 
     # branch the problem
     subbip = select_variables(rp, config.measure, config.selector)  # select a subset of variables
@@ -22,6 +23,17 @@ function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem
         end
     end
     return res
+end
+
+function check_stopped(bs::AbstractBranchingStatus)
+    # if there is no clause, then the problem is solved.
+    if all(bs.undecided_literals .== -1)
+        return true,true
+    end
+    if any(bs.undecided_literals .== 0)
+        return true,false
+    end
+    return false,false
 end
 
 function check_stopped(problem::BooleanInferenceProblem,result_type)

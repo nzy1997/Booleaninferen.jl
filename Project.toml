@@ -8,11 +8,13 @@ GenericTensorNetworks = "3521c873-ad32-4bb4-b63d-f4f178f42b49"
 OptimalBranchingCore = "c76e7b22-e1d2-40e8-b0f1-f659837787b8"
 Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
 ProblemReductions = "899c297d-f7d2-4ebf-8815-a35996def416"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 GenericTensorNetworks = "3"
 OptimalBranchingCore = "0.1"
 Primes = "0.5.6"
+SparseArrays = "1.11.0"
 julia = "1.11"
 
 [extras]

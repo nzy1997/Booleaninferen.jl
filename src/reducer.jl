@@ -1,11 +1,13 @@
 struct DeductionReducer <: AbstractReducer end
 
-function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, ::DeductionReducer)
+function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, bs::AbstractBranchingStatus, reducing_queue::Vector{Int}, ::DeductionReducer)
     he2v = copy(p.he2v)
 	tensors = copy(p.tensors)
     v2he = copy(p.v2he)
     data = fill(0, p.literal_num)
-	while true
+	while !isempty(reducing_queue)
+        edge_num = popfirst!(reducing_queue)
+        slice_tensor(p.tensors[edge_num], he2v[edge_num], edge_num, data)
         he2v, tensors = remove_zeros!(he2v, tensors)
         unitedge = findfirst(x -> count(==(Tropical(0.0)),x) == 1 ,tensors)
         # @show unitedge

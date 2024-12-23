@@ -1,14 +1,20 @@
 module BooleanInference
 
+using SparseArrays
 using OptimalBranchingCore
-using OptimalBranchingCore: AbstractProblem,select_variables,apply_branch,reduce_problem
+using OptimalBranchingCore: AbstractProblem,select_variables,apply_branch,reduce_problem,_vec2int
 using OptimalBranchingCore.BitBasis
 using GenericTensorNetworks
 using GenericTensorNetworks.OMEinsum
 import ProblemReductions
 import ProblemReductions: CircuitSAT,Circuit,Factoring,reduceto
+
 # using GenericTensorNetworks: ∧, ∨, ¬
 
+# status
+export BranchingStatus, initialize_branching_status
+# stride 
+export tensor2vec,get_tensor_number,slice_tensor, vec2tensor
 # types
 export BooleanInferenceProblem,BooleanResultBranchCount
 
@@ -24,6 +30,8 @@ export DeductionReducer
 # selector
 export KNeighborSelector,neighboring,k_neighboring,neighbor_subbip
 
+include("status.jl")
+include("stride.jl")
 include("types.jl")
 include("algebra.jl")
 include("interface.jl")

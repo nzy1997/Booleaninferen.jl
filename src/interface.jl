@@ -6,7 +6,8 @@ function sat2bip(sat::ConstraintSatisfactionProblem)
     problem = GenericTensorNetwork(sat)
     he2v = getixsv(problem.code)
     tensors = GenericTensorNetworks.generate_tensors(Tropical(1.0), problem)
-    new_tensors = [replace(t,Tropical(1.0) => zero(Tropical{Float64})) for t in tensors]
+    vec_tensors = [vec(t) for t in tensors]
+    new_tensors = [replace(t,Tropical(1.0) => zero(Tropical{Float64})) for t in vec_tensors]
     return BooleanInferenceProblem(new_tensors, he2v, length(problem.problem.symbols)), problem.problem.symbols
 end
 
@@ -16,6 +17,7 @@ end
 
 function solvebip(sat::ConstraintSatisfactionProblem; bs::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
     p,syms = sat2bip(sat)
+    bs = BranchingStatus(false,StaticElementVector(2,fill(0,p.literal_num)),StaticElementVector(2,fill(0,p.literal_num)),[length(p.he2v)])
     res = branch_and_reduce(p, bs, reducer,typeof(BooleanResult(true, 2, fill(0,p.literal_num))))
     return get_answer(res,p.literal_num)
 end
