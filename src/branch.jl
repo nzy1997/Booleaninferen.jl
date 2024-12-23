@@ -5,11 +5,9 @@ function OptimalBranchingCore.apply_branch(p::BooleanInferenceProblem, clause::C
 end
 
 function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem, config::BranchingStrategy, reducer::AbstractReducer)
-    stopped, res = check_stopped(problem) 
-    stopped && return res
-
     rp, reducedvalue = reduce_problem(problem, reducer)
-    # rp !== problem && return branch_and_reduce(rp, config, reducer) * reducedvalue
+    stopped, res = check_stopped(rp) 
+    stopped && return res
 
     # branch the problem
     subbip = select_variables(rp, config.measure, config.selector)  # select a subset of variables
@@ -17,9 +15,9 @@ function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem
     result = optimal_branching_rule(tbl, subbip.vs, rp, config.measure, config.set_cover_solver)  # compute the optimal branching rule
     for branch in result.optimal_rule.clauses
         subproblem, localvalue = apply_branch(rp, branch, subbip.vs)
-        res = branch_and_reduce(subproblem, config, reducer) * (localvalue) * reducedvalue
-        if res.rs == Tropical(0.0)
-            return res
+        res2 = branch_and_reduce(subproblem, config, reducer) * (localvalue) * reducedvalue
+        if res2.rs == Tropical(0.0)
+            return res2
         end
     end
     return res

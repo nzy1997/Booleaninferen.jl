@@ -1,6 +1,6 @@
 struct DeductionReducer <: AbstractReducer end
 
-function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, ::DeductionReducer) where R
+function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, ::DeductionReducer)
     he2v = copy(p.he2v)
 	tensors = copy(p.tensors)
     
@@ -18,7 +18,7 @@ function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, ::Deduc
         end
 		he2v, tensors, data = decide_literal!(he2v, tensors, vs, v_val, data)
 	end
-	return BooleanInferenceProblem(tensors, he2v, p.literal_num), BooleanResult(true, p.literal_num, data)
+	return BooleanInferenceProblem(tensors, he2v, p.literal_num), BooleanResult(true, 2, data)
 end
 
 function remove_zeros!(he2v, tensors)
@@ -40,7 +40,7 @@ function remove_literal(vertices::Vector{Int}, p::BooleanInferenceProblem, claus
         end
     end
     p_new = decide_literal(p, decided_v, data)
-    return p_new, BooleanResult(true, p.literal_num, data)
+    return p_new, BooleanResult(true, 2, data)
 end
 
 function decide_literal(p::BooleanInferenceProblem, vertices::Vector{Int}, data::Vector{Int})
@@ -75,4 +75,17 @@ function decide_literal!(he2v, tensors, dls::Vector{Int}, new_vals::Vector{Int},
         he2v, tensors,data = decide_literal!(he2v, tensors, v, v_val,data)
 	end
     return he2v, tensors, data
+end
+
+function _vertex_in_edge(he2vi,dls::Vector{Int},new_vals::Vector{Int})
+    pos = Int[]
+    vals = Int[]
+    for i in 1:length(dls)
+        v = dls[i]
+        if v in he2vi
+            push!(pos, findfirst(==(v), he2vi))
+            push!(vals, new_vals[i])
+        end
+    end
+    return pos, vals
 end

@@ -17,13 +17,18 @@ end
 function solvebip(sat::ConstraintSatisfactionProblem; bs::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
     p,syms = sat2bip(sat)
     res = branch_and_reduce(p, bs, reducer)
-    return get_answer(res), res.config.data[1:p.literal_num] .== one(UInt64)
+    return get_answer(res,p.literal_num)
 end
 
-function factoring(n::Int, m::Int, N::Int)
+function solve_factoring(n::Int, m::Int, N::Int)
     fproblem = Factoring(m, n, N)
     res = reduceto(CircuitSAT,fproblem)
     ans,vals = solvebip(res.circuit)
     a, b = ProblemReductions.read_solution(fproblem, [vals[res.p]...,vals[res.q]...])
     return a,b
+end
+
+function solve_sat(sat::ConstraintSatisfactionProblem)
+    res,vals = solvebip(sat)
+    return res, Dict(zip(sat.symbols,vals))
 end

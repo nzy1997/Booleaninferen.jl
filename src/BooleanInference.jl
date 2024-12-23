@@ -1,10 +1,11 @@
 module BooleanInference
 
 using OptimalBranchingCore
-using OptimalBranchingCore: AbstractProblem,select_variables,apply_branch
+using OptimalBranchingCore: AbstractProblem,select_variables,apply_branch,reduce_problem
 using OptimalBranchingCore.BitBasis
 using GenericTensorNetworks
 using GenericTensorNetworks.OMEinsum
+import ProblemReductions
 import ProblemReductions: CircuitSAT,Circuit,Factoring,reduceto
 # using GenericTensorNetworks: ∧, ∨, ¬
 
@@ -15,7 +16,7 @@ export BooleanInferenceProblem
 export BooleanResult
 
 # interface
-export cnf2bip,cir2bip,sat2bip,solvebip,factoring
+export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat
 
 # reducer
 export DeductionReducer

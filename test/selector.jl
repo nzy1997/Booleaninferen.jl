@@ -6,7 +6,7 @@ using BooleanInference.OptimalBranchingCore: select_variables
 @testset "neighboring" begin
     @bools a b c d e
     cnf = ∧(∨(b), ∨(a,¬c), ∨(d,¬b), ∨(¬c,¬d), ∨(a,e), ∨(a,e,¬c))
-    bip = cnf2bip(cnf)
+    bip,syms = cnf2bip(cnf)
 
     subbip = neighboring(bip,1)
     @test subbip == [1, 4]
@@ -18,7 +18,7 @@ end
 @testset "k_neighboring" begin
     @bools a b c d e
     cnf = ∧(∨(b), ∨(a,¬c), ∨(d,¬b), ∨(¬c,¬d), ∨(a,e), ∨(a,e,¬c))
-    bip = cnf2bip(cnf)
+    bip,syms = cnf2bip(cnf)
 
     subbip = k_neighboring(bip,1,2)
     @test subbip == [1, 3, 4]
@@ -31,7 +31,7 @@ end
     @bools a b c d e f g
     cnf = ∧(∨(a, b, ¬d, ¬e), ∨(¬a, d, e, ¬f), ∨(f, g), ∨(¬b, c))
     sat = Satisfiability(cnf)
-    bip = sat2bip(sat)
+    bip,syms = sat2bip(sat)
 
     subbip = select_variables(bip,BooleanInference.NumOfVertices(),KNeighborSelector(2))
     @test subbip.vs == collect(1:7)
