@@ -1,7 +1,6 @@
 struct TNContractionSolver <: AbstractTableSolver end
 
 function OptimalBranchingCore.branching_table(bip::BooleanInferenceProblem, bs::AbstractBranchingStatus,solver::TNContractionSolver, subbip::SubBIP)
-    # TODO: Not dry!!!
     decided_v = [ i for i in 1:bip.literal_num if readbit(bs.decided_mask, i) == 1]
     subhe2v = [setdiff(bip.he2v[e], decided_v) for e in 1: length(bip.he2v)]
 

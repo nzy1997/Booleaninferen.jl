@@ -38,3 +38,14 @@ function lluint2vec(x::LongLongUInt,vals::LongLongUInt, vec::Vector{Int})
     end
     return pos,pos_vals
 end
+
+function _vertex_in_edge(he2vi, dls::Vector{Int})
+	pos = Int[]
+	for i in 1:length(dls)
+		v = dls[i]
+		if v in he2vi
+			push!(pos, findfirst(==(v), he2vi))
+		end
+	end
+	return pos
+end

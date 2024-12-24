@@ -20,5 +20,6 @@ end
 @testset "branch_and_reduce" begin
     @bools a b c d e f g
     cnf = ∧(∨(a, b, ¬d, ¬e), ∨(¬a, d, e, ¬f), ∨(f, g), ∨(¬b, c))
-    solvebip(Satisfiability(cnf))
+    ans,vals = solvebip(Satisfiability(cnf))
+    @test ans
 end

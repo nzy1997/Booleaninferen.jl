@@ -43,7 +43,7 @@ end
     cnf = ∧(∨(a, b, ¬d, ¬e), ∨(¬a, d, e, ¬f), ∨(f, g), ∨(¬b, c))
 	bip, syms = cnf2bip(cnf)
     bs = initialize_branching_status(bip)
-    bs_new ,aedges = decide_literal(bs,bip,[1,2],[0,1])
+    bs_new ,aedges = decide_literal(bs,bip,[1,2],Clause(0b11, 0b10))
     @test bs_new.undecided_literals == [-1,-1,2,1]
     @test bs_new.config == 2
     @test bs_new.decided_mask == 3

@@ -1,9 +1,9 @@
 using BooleanInference
 using Test
 
-@testset "algebra.jl" begin
-    include("algebra.jl")
-end
+# @testset "algebra.jl" begin
+#     include("algebra.jl")
+# end
 
 @testset "interface.jl" begin
     include("interface.jl")

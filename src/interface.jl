@@ -18,7 +18,7 @@ end
 function solvebip(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
     p,syms = sat2bip(sat)
     bs = initialize_branching_status(p)
-    bs = reduce_problem(p,bs,collect(1:p.literal_num),reducer)
+    bs = reduce_problem(p,bs,collect(1:length(p.he2v)),reducer)
     ns,res = branch_and_reduce(p,bs, bsconfig, reducer)
     return ns,get_answer(res,p.literal_num)
 end

@@ -48,35 +48,30 @@ function check_reduce(he2vi, bs::AbstractBranchingStatus, tensor)
 end
 
 
-function decide_literal(bs::AbstractBranchingStatus, p::BooleanInferenceProblem, vertices::Vector{Int}, clause::Clause{N}) where N
-	data = Int[]
-	decided_v = Int[]
+function decide_literal(bs::BranchingStatus{C}, p::BooleanInferenceProblem, vertices::Vector{Int}, clause::Clause{N}) where {N,C}
+	config = copy(bs.config)
+	# mask = copy(bs.decided_mask)
+	dls = Int[]
 	for (k, v) in enumerate(vertices)
 		if readbit(clause.mask, k) == 1 && (readbit(bs.decided_mask, v) == 0)
-			push!(decided_v, v)
-			push!(data, Int(readbit(clause.val, k)))
+			push!(dls, v)
+			# mask = mask | LongLongUInt{C}(1) << (v - 1)
+			if readbit(clause.val, k) == 1
+				config = config | LongLongUInt{C}(1) << (v - 1)
+			end
 		end
 	end
-	return decide_literal(bs, p, decided_v, data)
-end
-
-function decide_literal(bs::AbstractBranchingStatus, p::BooleanInferenceProblem, dls::Int, new_vals::Vector{Int})
-	return decide_literal(bs, p, [dls], new_vals)
-end
-function decide_literal(bs::BranchingStatus{C}, p::BooleanInferenceProblem, dls::Vector{Int}, new_vals::Vector{Int}) where C
-	config = copy(bs.config)
 	mask = bs.decided_mask | vec2lluint(dls, typeof(config))
-	for i in 1:length(dls)
-		new_vals[i] == 1 || continue
-		config = config | LongLongUInt{C}(1) << (dls[i] - 1)
-	end
 	undecided_literals = copy(bs.undecided_literals)
 	aedges = Int[] # Edges that have been changed
-    # testa = mapreduce(v -> p.v2he[v], ∪, dls)
 	for edge_num in mapreduce(v -> p.v2he[v], ∪, dls)
 		if bs.undecided_literals[edge_num] > 0
 			zerocount, _ = check_reduce(p.he2v[edge_num], mask, config, p.tensors[edge_num])
+
 			decided_num = count(x -> x in dls, p.he2v[edge_num])
+			# edge_mask = vec2lluint(p.he2v[edge_num], typeof(config))
+			# decided_num = count_ones(edge_mask & mask) - count_ones(edge_mask & bs.decided_mask)
+
 			if (zerocount == 2^(undecided_literals[edge_num] - decided_num))
 				undecided_literals[edge_num] = -1
 			else
@@ -86,15 +81,4 @@ function decide_literal(bs::BranchingStatus{C}, p::BooleanInferenceProblem, dls:
 		end
 	end
 	return BranchingStatus(config, mask, undecided_literals), aedges
-end
-
-function _vertex_in_edge(he2vi, dls::Vector{Int})
-	pos = Int[]
-	for i in 1:length(dls)
-		v = dls[i]
-		if v in he2vi
-			push!(pos, findfirst(==(v), he2vi))
-		end
-	end
-	return pos
 end
