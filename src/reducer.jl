@@ -1,30 +1,59 @@
 struct DeductionReducer <: AbstractReducer end
 
 function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, bs::AbstractBranchingStatus, reducing_queue::Vector{Int}, ::DeductionReducer)
-    he2v = copy(p.he2v)
-	tensors = copy(p.tensors)
-    v2he = copy(p.v2he)
-    data = fill(0, p.literal_num)
 	while !isempty(reducing_queue)
+        isempty(reducing_queue) && break
         edge_num = popfirst!(reducing_queue)
-        slice_tensor(p.tensors[edge_num], he2v[edge_num], edge_num, data)
-        he2v, tensors = remove_zeros!(he2v, tensors)
-        unitedge = findfirst(x -> count(==(Tropical(0.0)),x) == 1 ,tensors)
-        # @show unitedge
-        # @show tensors[unitedge]
-        # @show he2v[unitedge]
-        isnothing(unitedge) && break
-		vs = he2v[unitedge]
-        v_val = findfirst(==(Tropical(0.0)), tensors[unitedge])
-        if v_val isa CartesianIndex
-            v_val = collect(v_val.I)
-        else
-            vs = vs[1]
-        end
-		he2v, tensors, data = decide_literal!(he2v, tensors, vs, v_val, data)
-        # he2v, tensors, data,v2he = decide_literal!(he2v, tensors,v2he, vs, v_val, data)
+        (bs.undecided_literals[edge_num] <= 0) && continue
+        decided_v, decided_vals = lluint2vec(bs.decided_mask,bs.config,p.he2v[edge_num])
+
+        st = slice_tensor(p.tensors[edge_num], _vertex_in_edge(p.he2v[edge_num],decided_v), decided_vals.+1 , length(p.he2v[edge_num]))
+        
+        (count(==(Tropical(0.0)),st) == 1) || continue
+        v = findfirst(==(Tropical(0.0)),st)
+        pos_vals = bin_to_vec(v-1,bs.undecided_literals[edge_num])
+
+
+        undecided_v = setdiff(p.he2v[edge_num], decided_v)
+
+        bs, aedges = decide_literal(bs, p, undecided_v, pos_vals)
+
+        reducing_queue = reducing_queue ∪ aedges
 	end
-	return BooleanInferenceProblem(tensors, he2v,v2he, p.literal_num), BooleanResult(true, 2, data).config
+	return bs
+end
+
+function slice_tensor(tensor::AbstractVector, mask::LongLongUInt, config::LongLongUInt, he2vi::Vector{Int})
+    decided_v,decided_vals = lluint2vec(mask,config,he2vi)
+    return slice_tensor(tensor, _vertex_in_edge(he2vi,decided_v), decided_vals.+1 , length(he2vi))
+end
+
+function decide_literal(bs::AbstractBranchingStatus, p::BooleanInferenceProblem, dls::Int, new_vals::Vector{Int})
+    return decide_literal(bs, p,[dls],new_vals)
+end
+function decide_literal(bs::AbstractBranchingStatus, p::BooleanInferenceProblem, dls::Vector{Int}, new_vals::Vector{Int})
+    vedges = [e for e in reduce(∪, [p.v2he[v] for v in dls]) if bs.undecided_literals[e] > 0]
+    config = copy(bs.config)
+    mask = bs.decided_mask | vec2lluint(dls,typeof(config))
+    [config = config | 1 << (dls[i]-1) for i in 1:length(dls) if new_vals[i] == 1]
+    undecided_literals = copy(bs.undecided_literals)
+    aedges = Int[] # Edges that have been changed
+    for edge_num in vedges
+        st = slice_tensor(p.tensors[edge_num], mask, config, p.he2v[edge_num])
+        if all(==(Tropical(0.0)),st)
+            undecided_literals[edge_num] = -1
+        else
+            undecided_literals[edge_num] -= count(x -> x in dls, p.he2v[edge_num])
+            push!(aedges, edge_num)
+        end
+	end
+    return BranchingStatus(config, mask, undecided_literals), aedges
+end
+
+function decide_mask(mask::LongLongUInt, config::LongLongUInt,dls::Vector{Int}, new_vals::Vector{Int})
+    mask = mask | vec2lluint(dls,typeof(config))
+    [config = config | 1 << (i-1) for i in dls if new_vals[i] == 2]
+    return masknew, config
 end
 
 function remove_zeros!(he2v, tensors)
@@ -83,17 +112,15 @@ function decide_literal!(he2v, tensors, dls::Vector{Int}, new_vals::Vector{Int},
     return he2v, tensors, data
 end
 
-function _vertex_in_edge(he2vi,dls::Vector{Int},new_vals::Vector{Int})
+function _vertex_in_edge(he2vi,dls::Vector{Int})
     pos = Int[]
-    vals = Int[]
     for i in 1:length(dls)
         v = dls[i]
         if v in he2vi
             push!(pos, findfirst(==(v), he2vi))
-            push!(vals, new_vals[i])
         end
     end
-    return pos, vals
+    return pos
 end
 
 function _make_colon_vector(pos,vals,n::Int)

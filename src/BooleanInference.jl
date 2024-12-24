@@ -14,7 +14,7 @@ import ProblemReductions: CircuitSAT,Circuit,Factoring,reduceto
 # status
 export BranchingStatus, initialize_branching_status
 # stride 
-export tensor2vec,get_tensor_number,slice_tensor, vec2tensor
+export tensor2vec,get_tensor_number,slice_tensor, vec2tensor,vec2lluint,lluint2vec
 # types
 export BooleanInferenceProblem,BooleanResultBranchCount
 
@@ -25,7 +25,7 @@ export BooleanResult
 export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat,solve_factoring_count
 
 # reducer
-export DeductionReducer
+export DeductionReducer,decide_literal
 
 # selector
 export KNeighborSelector,neighboring,k_neighboring,neighbor_subbip

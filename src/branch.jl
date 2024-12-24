@@ -4,7 +4,7 @@ function OptimalBranchingCore.apply_branch(p::BooleanInferenceProblem, clause::C
     return p_new2, (res * res2)
 end
 
-function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem, bs::AbstractBranchingStatus,config::BranchingStrategy, reducer::AbstractReducer,result_type)
+function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem, bs::AbstractBranchingStatus,config::BranchingStrategy, reducer::AbstractReducer)
     rp, reducedvalue = reduce_problem(problem, reducer)
 
     stopped, res = check_stopped(bs)
