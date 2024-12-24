@@ -1,9 +1,16 @@
 struct TNContractionSolver <: AbstractTableSolver end
 
-function OptimalBranchingCore.branching_table(bip::BooleanInferenceProblem, solver::TNContractionSolver, subbip::SubBIP)
-    eincode = DynamicEinCode{Int}(bip.he2v[subbip.edges], subbip.vs)
+function OptimalBranchingCore.branching_table(bip::BooleanInferenceProblem, bs::AbstractBranchingStatus,solver::TNContractionSolver, subbip::SubBIP)
+    # TODO: Not dry!!!
+    decided_v = [ i for i in 1:bip.literal_num if readbit(bs.decided_mask, i) == 1]
+    subhe2v = [setdiff(bip.he2v[e], decided_v) for e in 1: length(bip.he2v)]
+
+    eincode = DynamicEinCode{Int}(subhe2v[subbip.edges], subbip.vs)
 	optcode = optimize_code(eincode, uniformsize(eincode, 2), GreedyMethod())
-	sub_tensors = optcode(bip.tensors[subbip.edges]...)
+
+    sub_tensors = optcode([vec2tensor(slice_tensor(bip.tensors[e],bs.decided_mask,bs.config,bip.he2v[e])) for e in subbip.edges]...)
+
+	# sub_tensors = optcode(((bip.tensors[subbip.edges]))...)
 	out_vs_num = length(subbip.outside_vs_ind)
 	vs_num = length(subbip.vs)
 	ind_pos = [i ∈ subbip.outside_vs_ind ? findfirst(==(i), subbip.outside_vs_ind) : findfirst(==(i), setdiff(1:vs_num, subbip.outside_vs_ind)) for i in 1:vs_num]

@@ -14,12 +14,18 @@ function slice_tensor(tensor::AbstractVector, pos::Vector{Int}, pos_vals::Vector
     return [get_tensor_number(tensor,get_vals!(vals,float_pos,i)) for i in 0:2^(n-length(pos))-1]
 end
 
+function slice_tensor(tensor::AbstractVector, mask::LongLongUInt, config::LongLongUInt, he2vi::Vector{Int})
+	decided_v, decided_vals = lluint2vec(mask, config, he2vi)
+	return slice_tensor(tensor, _vertex_in_edge(he2vi, decided_v), decided_vals .+ 1, length(he2vi))
+end
+
+
 function vec2tensor(vec::AbstractVector)
     return reshape(vec, fill(2, Int(log2(length(vec))))...)
 end
 
-function vec2lluint(vec::Vector{Int}, T)
-    return T(sum([1<<(i-1) for i in vec]))
+function vec2lluint(vec::Vector{Int}, ::Type{T}) where T
+    return sum(i->T(1)<<(i-1), vec)
 end
 function lluint2vec(x::LongLongUInt,vals::LongLongUInt, vec::Vector{Int})
     pos = Int[]
@@ -27,15 +33,8 @@ function lluint2vec(x::LongLongUInt,vals::LongLongUInt, vec::Vector{Int})
     for i in vec 
         if readbit(x,i) == 1
             push!(pos, i)
-            push!(pos_vals, (vals >> (i-1)) & 1)
+            push!(pos_vals, readbit(vals,i))
         end
     end
     return pos,pos_vals
-end
-
-function slice_tensor(tensor::AbstractVector, mask::LongLongUInt, mask_vals::LongLongUInt, n::Int)
-    vals = fill(0,n)
-    vals[pos] = pos_vals
-    float_pos = setdiff(1:n,pos)
-    return [get_tensor_number(tensor,get_vals!(vals,float_pos,i)) for i in 0:2^(n-length(pos))-1]
 end

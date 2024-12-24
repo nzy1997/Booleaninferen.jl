@@ -10,10 +10,10 @@ BooleanInferenceProblem(tensor::Vector{Vector{Tropical{Float64}}}, he2v::Vector{
 Base.copy(p::BooleanInferenceProblem) = BooleanInferenceProblem(copy(p.tensors), copy(p.he2v),copy(p.v2he), p.literal_num)
 
 struct NumOfVertices <: AbstractMeasure end
-OptimalBranchingCore.measure(p::BooleanInferenceProblem, ::NumOfVertices) = isempty(p.he2v) ? 0 : length(reduce(∪, p.he2v))
+OptimalBranchingCore.measure(bs::AbstractBranchingStatus, ::NumOfVertices) = - count_ones(bs.decided_mask)
 
 struct NumOfClauses <: AbstractMeasure end
-OptimalBranchingCore.measure(p::BooleanInferenceProblem, ::NumOfClauses) = length(p.he2v)
+OptimalBranchingCore.measure(bs::AbstractBranchingStatus, ::NumOfClauses) = count( >=(0) ,bs.undecided_literals)
 
 function initialize_branching_status(p::BooleanInferenceProblem)
     t = (p.literal_num-1) ÷ 64 + 1

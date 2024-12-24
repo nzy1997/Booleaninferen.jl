@@ -2,7 +2,7 @@ module BooleanInference
 
 using SparseArrays
 using OptimalBranchingCore
-using OptimalBranchingCore: AbstractProblem,select_variables,apply_branch,reduce_problem,_vec2int
+using OptimalBranchingCore: AbstractProblem,select_variables,apply_branch,reduce_problem,_vec2int,optimal_branching_rule,candidate_clauses
 using OptimalBranchingCore.BitBasis
 using GenericTensorNetworks
 using GenericTensorNetworks.OMEinsum
@@ -19,7 +19,7 @@ export tensor2vec,get_tensor_number,slice_tensor, vec2tensor,vec2lluint,lluint2v
 export BooleanInferenceProblem,BooleanResultBranchCount
 
 # algebra
-export BooleanResult
+# export BooleanResult
 
 # interface
 export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat,solve_factoring_count
@@ -28,12 +28,12 @@ export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat,solve_factorin
 export DeductionReducer,decide_literal
 
 # selector
-export KNeighborSelector,neighboring,k_neighboring,neighbor_subbip
+export KNeighborSelector,neighboring,k_neighboring,neighbor_subbip,subhg
 
 include("status.jl")
 include("stride.jl")
 include("types.jl")
-include("algebra.jl")
+# include("algebra.jl")
 include("interface.jl")
 include("reducer.jl")
 include("selector.jl")

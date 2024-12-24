@@ -2,8 +2,8 @@ using BooleanInference
 using BooleanInference.GenericTensorNetworks
 using Test
 using BooleanInference.GenericTensorNetworks: ∧, ∨, ¬
-using BooleanInference.OptimalBranchingCore: reduce_problem
-import BooleanInference.ProblemReductions: @circuit, Assignment,BooleanExpr
+using BooleanInference.OptimalBranchingCore: reduce_problem,apply_branch,Clause
+import BooleanInference.ProblemReductions: @circuit, Assignment,BooleanExpr,Factoring,reduceto,CircuitSAT
 using BooleanInference.OptimalBranchingCore.BitBasis
 
 
@@ -48,4 +48,13 @@ end
     @test bs_new.config == 2
     @test bs_new.decided_mask == 3
     @test aedges == [4]
+end
+
+@testset "benchmark" begin
+    fproblem = Factoring(3, 5,7* 17)
+    sat = reduceto(CircuitSAT,fproblem)
+    p,syms = BooleanInference.sat2bip(sat.circuit)
+    bs = initialize_branching_status(p)
+
+    bs = apply_branch(p, bs, Clause(0b001, 0b000),[1,2,3])
 end
