@@ -1,5 +1,6 @@
 using BooleanInference
 using Test
+using BooleanInference.GenericTensorNetworks
 using BooleanInference.GenericTensorNetworks: ∧, ∨, ¬
 using BooleanInference.OptimalBranchingCore: branching_table,select_variables
 

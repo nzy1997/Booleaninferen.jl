@@ -15,7 +15,7 @@ function cir2bip(cir::Circuit)
     return sat2bip(CircuitSAT(cir))
 end
 
-function solvebip(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
+function solvebip(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(1), measure=NumOfVertices()), reducer=DeductionReducer())
     p,syms = sat2bip(sat)
     bs = initialize_branching_status(p)
     bs = reduce_problem(p,bs,collect(1:length(p.he2v)),reducer)

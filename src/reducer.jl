@@ -6,7 +6,7 @@ function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, bs::Abs
 		edge_num = popfirst!(reducing_queue)
 		(bs.undecided_literals[edge_num] <= 0) && continue
 
-		zerocount, sumpos = check_reduce(p.he2v[edge_num], bs, p.tensors[edge_num])
+		zerocount, sumpos = check_reduce(p.he2v[edge_num], bs.decided_mask,bs.config, p.tensors[edge_num])
 		(zerocount == 1) || continue
 
 		bs, aedges = decide_literal(bs, p, p.he2v[edge_num], Clause(2^length(p.he2v[edge_num]) - 1, sumpos - 1))
@@ -43,10 +43,6 @@ function check_reduce(he2vi, mask, config, tensor)
 	end
 	return count, sumpos
 end
-function check_reduce(he2vi, bs::AbstractBranchingStatus, tensor)
-	return check_reduce(he2vi, bs.decided_mask, bs.config, tensor)
-end
-
 
 function decide_literal(bs::BranchingStatus{C}, p::BooleanInferenceProblem, vertices::Vector{Int}, clause::Clause{N}) where {N,C}
 	config = copy(bs.config)
