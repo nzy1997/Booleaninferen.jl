@@ -1,9 +1,3 @@
-struct SingleVertex <: AbstractSelector end
-
-function OptimalBranchingCore.select_variables(p::BooleanInferenceProblem, m::M, selector::SingleVertex) where{M<:AbstractMeasure}
-    return [p.he2v[1][1]]
-end
-
 struct SubBIP{N}
     vs::Vector{Int}
     edges::Vector{Int}

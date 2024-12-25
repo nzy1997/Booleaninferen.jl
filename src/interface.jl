@@ -15,19 +15,22 @@ function cir2bip(cir::Circuit)
     return sat2bip(CircuitSAT(cir))
 end
 
-function solvebip(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
+function solvebip(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(1), measure=NumOfVertices()), reducer=DeductionReducer())
     p,syms = sat2bip(sat)
     bs = initialize_branching_status(p)
     bs = reduce_problem(p,bs,collect(1:length(p.he2v)),reducer)
+    # ns,res = mybranch_and_reduce(p,bs, bsconfig, reducer)
     ns,res = branch_and_reduce(p,bs, bsconfig, reducer)
     return ns,get_answer(res,p.literal_num)
 end
 
 function solve_factoring(n::Int, m::Int, N::Int)
+    # global BRANCHNUMBER = 0
     fproblem = Factoring(m, n, N)
     res = reduceto(CircuitSAT,fproblem)
     ans,vals = solvebip(res.circuit)
     a, b = ProblemReductions.read_solution(fproblem, [vals[res.p]...,vals[res.q]...])
+    # @show BRANCHNUMBER
     return a,b
 end
 

@@ -44,7 +44,7 @@ function check_reduce(he2vi, mask, config, tensor)
 	return count, sumpos
 end
 
-function decide_literal(bs::BranchingStatus{C}, p::BooleanInferenceProblem, vertices::Vector{Int}, clause::Clause{N}) where {N,C}
+function decide_literal(bs::AbstractBranchingStatus{C}, p::BooleanInferenceProblem, vertices::Vector{Int}, clause::Clause{N}) where {N,C}
 	config = copy(bs.config)
 	# mask = copy(bs.decided_mask)
 	dls = Int[]
