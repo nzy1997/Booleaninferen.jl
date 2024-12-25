@@ -15,7 +15,7 @@ function cir2bip(cir::Circuit)
     return sat2bip(CircuitSAT(cir))
 end
 
-function solvebip(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(1), measure=NumOfVertices()), reducer=DeductionReducer())
+function solvebip(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
     p,syms = sat2bip(sat)
     bs = initialize_branching_status(p)
     bs = reduce_problem(p,bs,collect(1:length(p.he2v)),reducer)
@@ -37,25 +37,25 @@ function solve_sat(sat::ConstraintSatisfactionProblem)
 end
 
 
-function solve_factoring_count(n::Int, m::Int, N::Int)
-    fproblem = Factoring(m, n, N)
-    res = reduceto(CircuitSAT,fproblem)
-    ns,vals,count =  solvebip_count(res.circuit)
-    a, b = ProblemReductions.read_solution(fproblem, [vals[res.p]...,vals[res.q]...])
-    @show count
-    return a,b
-end
+# function solve_factoring_count(n::Int, m::Int, N::Int)
+#     fproblem = Factoring(m, n, N)
+#     res = reduceto(CircuitSAT,fproblem)
+#     ns,vals,count =  solvebip_count(res.circuit)
+#     a, b = ProblemReductions.read_solution(fproblem, [vals[res.p]...,vals[res.q]...])
+#     @show count
+#     return a,b
+# end
 
-function solvebip_count(sat::ConstraintSatisfactionProblem; bs::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
-    p,syms = sat2bip(sat)
-    res = branch_and_reduce(p, bs, reducer,typeof(BooleanResultBranchCount(true, 2, fill(0,p.literal_num))))
-    return get_answer(res,p.literal_num)
-end
+# function solvebip_count(sat::ConstraintSatisfactionProblem; bs::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(2), measure=NumOfVertices()), reducer=DeductionReducer())
+#     p,syms = sat2bip(sat)
+#     res = branch_and_reduce(p, bs, reducer,typeof(BooleanResultBranchCount(true, 2, fill(0,p.literal_num))))
+#     return get_answer(res,p.literal_num)
+# end
 
-function solve_factoring_count(p1::Int, p2::Int)
-    n = Int(ceil(log2(p1+1)))
-    m = Int(ceil(log2(p2+1)))
-    N = p1*p2
-    println("n = $n, m = $m, N = $N")
-    return solve_factoring_count(n,m,N)
-end
+# function solve_factoring_count(p1::Int, p2::Int)
+#     n = Int(ceil(log2(p1+1)))
+#     m = Int(ceil(log2(p2+1)))
+#     N = p1*p2
+#     println("n = $n, m = $m, N = $N")
+#     return solve_factoring_count(n,m,N)
+# end

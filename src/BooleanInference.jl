@@ -18,9 +18,6 @@ export tensor2vec,get_tensor_number,slice_tensor, vec2tensor,vec2lluint,lluint2v
 # types
 export BooleanInferenceProblem,BooleanResultBranchCount
 
-# algebra
-# export BooleanResult
-
 # interface
 export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat,solve_factoring_count
 
@@ -28,12 +25,11 @@ export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat,solve_factorin
 export DeductionReducer,decide_literal
 
 # selector
-export KNeighborSelector,neighboring,k_neighboring,neighbor_subbip,subhg
+export KNeighborSelector,neighboring,k_neighboring,subhg
 
 include("status.jl")
 include("stride.jl")
 include("types.jl")
-# include("algebra.jl")
 include("interface.jl")
 include("reducer.jl")
 include("selector.jl")

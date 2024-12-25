@@ -47,11 +47,6 @@ end
 function neighboring(he2v::Vector{Vector{Int}}, v::Int)
     return neighboring(he2v, [v])
 end
-neighbor_subbip(he2v::Vector{Vector{Int}}, v::Int,edge_list) = neighbor_subbip(he2v, [v],edge_list)
-function neighbor_subbip(he2v::Vector{Vector{Int}}, vs::Vector{Int},edge_list)
-    vs, edges = _neighboring(he2v, vs)
-    return SubBIP(vs, edge_list[edges],[ind for ind in 1:length(vs) if any([vs[ind] ∈ v for v in he2v[setdiff(1:length(he2v),edges)]])], he2v[edges])
-end
 
 function subhg(bip::BooleanInferenceProblem, bs::AbstractBranchingStatus)
     decided_v = [ i for i in 1:bip.literal_num if readbit(bs.decided_mask, i) == 1]

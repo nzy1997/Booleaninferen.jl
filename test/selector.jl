@@ -9,9 +9,10 @@ using BooleanInference.OptimalBranchingCore: select_variables,apply_branch,Claus
 	bip, syms = cnf2bip(cnf)
     bs = initialize_branching_status(bip)
 	bsnew = reduce_problem(bip, bs, collect(1:5),DeductionReducer())
-    subhe2v = subhg(bip,bsnew)
+    subhe2v,elist = subhg(bip,bsnew)
 
     @test subhe2v == [[2, 3, 4],[5, 6],[2, 7]]
+    @test elist == [1,3,4]
 end
 
 @testset "neighboring" begin
@@ -49,13 +50,4 @@ end
     @test subbip.vs == collect(1:7)
     @test subbip.edges == collect(1:4)
     @test subbip.outside_vs_ind == []
-
-    subbip = neighbor_subbip(bip.he2v,neighboring(bip.he2v,7))
-    @test subbip.vs == [1, 2, 3, 4, 7]
-    @test subbip.edges == [1,4]
-    @test subbip.outside_vs_ind == [1,3,4]
-
-    bs = apply_branch(bip, bs, Clause(0b001, 0b000),[1,2,3])
-    subbip = select_variables(bip,bs, BooleanInference.NumOfVertices(),KNeighborSelector(1))
-    tbl = branching_table(bip, bs,BooleanInference.TNContractionSolver(), subbip)
 end
