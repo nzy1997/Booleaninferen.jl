@@ -16,16 +16,19 @@ export BranchingStatus, initialize_branching_status
 # stride 
 export tensor2vec,get_tensor_number,slice_tensor, vec2tensor,vec2lluint,lluint2vec
 # types
-export BooleanInferenceProblem,BooleanResultBranchCount
+export BooleanInferenceProblem,BooleanResultBranchCount,NumOfVertices,NumOfClauses,NumOfDegrees
 
 # interface
 export cnf2bip,cir2bip,sat2bip,solvebip,solve_factoring,solve_sat,solve_factoring_count
 
 # reducer
-export DeductionReducer,decide_literal
+export NoReducer,decide_literal
 
 # selector
-export KNeighborSelector,neighboring,k_neighboring,subhg
+export KNeighborSelector,neighboring,k_neighboring,subhg,Smallest2NeighborSelector
+
+# tablesolver
+export TNContractionSolver
 
 include("status.jl")
 include("stride.jl")

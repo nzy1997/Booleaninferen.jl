@@ -1,6 +1,31 @@
-struct DeductionReducer <: AbstractReducer end
+struct NoReducer <: AbstractReducer end
+struct RuleReducer <: AbstractReducer # Rules from paper "Fast Exact Algorithms for the SAT Problem with Bounded Occurrences of Variables"
+	rules::Vector{Int}
+end
+function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, bs::AbstractBranchingStatus,reducer::NoReducer)
+	return bs
+end
+function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, bs::AbstractBranchingStatus,reducer::RuleReducer)
+	if 4 ∈ reducer.rules
+		bs = reduction_4(p, bs)
+	end
+	return bs
+end
+function reduction_4(p::BooleanInferenceProblem, bs::AbstractBranchingStatus)
+	# Rule 4: If x is true in all clauses, set x to true.
+	for (i, undecided_literal_num) in enumerate(bs.undecided_literals)
+		if undecided_literal_num == 1
+			edge = p.he2v[i]
+			undecided_literal = findfirst(x -> readbit(bs.decided_mask, x) == 0, edge)
+			bs.decided_mask = bs.decided_mask | LongLongUInt(1) << (undecided_literal - 1)
+			bs.config = bs.config & (~(LongLongUInt(1) << (undecided_literal - 1)))
+			bs.undecided_literals[i] = -1
+		end
+	end
+	return bs
+end
 
-function OptimalBranchingCore.reduce_problem(p::BooleanInferenceProblem, bs::AbstractBranchingStatus, reducing_queue::Vector{Int}, ::DeductionReducer)
+function deduction_reduce(p::BooleanInferenceProblem, bs::AbstractBranchingStatus, reducing_queue::Vector{Int})
 	while !isempty(reducing_queue)
 		isempty(reducing_queue) && break
 		edge_num = popfirst!(reducing_queue)

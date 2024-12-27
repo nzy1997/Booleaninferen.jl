@@ -20,12 +20,5 @@ function initialize_branching_status(p::BooleanInferenceProblem)
     return BranchingStatus{t}(LongLongUInt{t}(0), LongLongUInt{t}(0), length.(p.he2v))
 end
 
-# function he2v2sparse(he2v::Vector{Vector{Int}})
-#     n = length(he2v)
-#     m = length(reduce(∪, he2v))
-#     sparse_matrix = spzeros(Bool, n, m)
-#     for i in 1:n
-#         sparse_matrix[i,he2v[i]] .= true
-#     end
-#     return sparse_matrix
-# end
+struct NumOfDegrees <: AbstractMeasure end
+OptimalBranchingCore.measure(bs::AbstractBranchingStatus, ::NumOfDegrees) = sum(x -> x > 0 ? x : 0 ,bs.undecided_literals)

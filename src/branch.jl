@@ -1,23 +1,26 @@
 function OptimalBranchingCore.apply_branch(p::BooleanInferenceProblem, bs::AbstractBranchingStatus,clause::Clause{INT}, vertices::Vector{T}) where {INT<:Integer, T<:Integer}
     bs_new, aedges = decide_literal(bs,p, vertices, clause)
-    return reduce_problem(p, bs_new, aedges,DeductionReducer())
+    return deduction_reduce(p, bs_new, aedges)
 end
 
 function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem, bs::AbstractBranchingStatus,config::BranchingStrategy, reducer::AbstractReducer)
-    stopped, res = check_stopped(bs)
-    stopped && return res, bs
+    stopped, res,count_num = check_stopped(bs)
+    stopped && return res, bs,count_num
 
     # branch the problem
     subbip = select_variables(problem, bs, config.measure, config.selector)  # select a subset of variables
     tbl = branching_table(problem,bs, config.table_solver, subbip)      # compute the BranchingTable
+    iszero(tbl.bit_length) && return false,bs,1
+
     result = optimal_branching_rule(tbl, subbip.vs, bs,problem, config.measure, config.set_cover_solver)  # compute the optimal branching rule
     for branch in result.optimal_rule.clauses
-        res, bs_new = branch_and_reduce(problem, apply_branch(problem,bs, branch, subbip.vs), config, reducer)
+        res, bs_new ,count_num1= branch_and_reduce(problem, apply_branch(problem,bs, branch, subbip.vs), config, reducer)
+        count_num += count_num1
         if res
-            return res, bs_new
+            return res, bs_new,count_num
         end
     end
-    return false, bs
+    return false, bs,count_num
 end
 
 function check_stopped(bs::AbstractBranchingStatus)
@@ -25,13 +28,13 @@ function check_stopped(bs::AbstractBranchingStatus)
     # if there is no clause, then the problem is solved.
     if all(bs.undecided_literals .== -1)
         # BRANCHNUMBER += 1
-        return true,true
+        return true,true,1
     end
     if any(bs.undecided_literals .== 0)
         # BRANCHNUMBER += 1
-        return true,false
+        return true,false,1
     end
-    return false,false
+    return false,false,0
 end
 
 function OptimalBranchingCore.optimal_branching_rule(table::BranchingTable, variables::Vector, bs::AbstractBranchingStatus,p::BooleanInferenceProblem, m::AbstractMeasure, solver::AbstractSetCoverSolver)

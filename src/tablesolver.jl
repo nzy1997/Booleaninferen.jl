@@ -10,12 +10,13 @@ function OptimalBranchingCore.branching_table(bip::BooleanInferenceProblem, bs::
 		answer = [i & (1 << j) != 0 for j in 0:out_vs_num-1]
 		out_index = [i ? 2 : 1 for i in answer]
 		vec = [i ∈ subbip.outside_vs_ind ? out_index[ind_pos[i]] : (:) for i in 1:vs_num]
-		in_indies = findall(==(Tropical(0.0)), subbip.sub_tensor[vec...])
+		in_indies = findall(==(Tropical(0.0)), subbip.sub_tensors[vec...])
 		if length(in_indies) == 0
 			continue
 		end
 		pcs = [[i ∈ subbip.outside_vs_ind ? out_index[ind_pos[i]] : in_index[ind_pos[i]] for i in 1:vs_num] .== fill(2, vs_num) for in_index in in_indies]
 		push!(possible_configurations, pcs)
 	end
-	return BranchingTable(vs_num, possible_configurations)
+	# @show possible_configurations
+	isempty(possible_configurations) ? (return BranchingTable(0,[Int[]])) : (return BranchingTable(vs_num, possible_configurations))
 end
