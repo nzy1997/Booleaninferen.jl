@@ -7,7 +7,7 @@ end
 
 struct KNeighborSelector <: AbstractSelector
     k::Int
-    initial_vertex_strategy::Int # 1: maximum, 2: minimum
+    initial_vertex_strategy::Int # 1: maximum, 2: minimum,3: minimum weight
 end
 
 struct Smallest2NeighborSelector <: AbstractSelector end
@@ -16,7 +16,10 @@ function OptimalBranchingCore.select_variables(p::BooleanInferenceProblem,bs::Ab
     he2v,edge_list,decided_v = subhg(p, bs)
     undecided_literals = setdiff(1:p.literal_num,decided_v)
 
-    initial_v = selector.initial_vertex_strategy == 1 ? maximum(undecided_literals) : minimum(undecided_literals)
+    v2he = [count(x -> i ∈ x, he2v) for i in undecided_literals]
+    index = argmin(x-> iszero(v2he[x]) ? Inf : v2he[x],1:length(v2he))
+    initial_v = undecided_literals[index]
+    # initial_v = selector.initial_vertex_strategy == 1 ? maximum(undecided_literals) : minimum(undecided_literals)
     
     vs, edges,outside_vs_ind  = k_neighboring(he2v,initial_v, selector.k)
 

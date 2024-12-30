@@ -1,5 +1,6 @@
 module BooleanInference
 
+using TropicalNumbers
 using SparseArrays
 using OptimalBranchingCore
 using OptimalBranchingCore: AbstractProblem,select_variables,apply_branch,reduce_problem,_vec2int,optimal_branching_rule,candidate_clauses
@@ -30,6 +31,9 @@ export KNeighborSelector,neighboring,k_neighboring,subhg,Smallest2NeighborSelect
 # tablesolver
 export TNContractionSolver
 
+# readcnf
+export readcnf,solvecnf
+
 include("status.jl")
 include("stride.jl")
 include("types.jl")
@@ -38,4 +42,5 @@ include("reducer.jl")
 include("selector.jl")
 include("tablesolver.jl")
 include("branch.jl")
+include("readcnf.jl")
 end

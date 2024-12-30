@@ -15,21 +15,16 @@ function cir2bip(cir::Circuit)
     return sat2bip(CircuitSAT(cir))
 end
 
-function solvebip(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(1,1), measure=NumOfVertices()), reducer=DeductionReducer())
+function solvesat(sat::ConstraintSatisfactionProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(1,1), measure=NumOfVertices()), reducer=NoReducer())
     p,syms = sat2bip(sat)
-    bs = initialize_branching_status(p)
-    bs = deduction_reduce(p,bs,collect(1:length(p.he2v)))
-    # ns,res = mybranch_and_reduce(p,bs, bsconfig, reducer)
-    ns,res,count_num = branch_and_reduce(p,bs, bsconfig, reducer)
-    @show count_num
-    return ns,get_answer(res,p.literal_num)
+    return solvebip(p; bsconfig, reducer)
 end
 
-function solve_factoring(n::Int, m::Int, N::Int; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector =KNeighborSelector(1,1), measure=NumOfVertices()), reducer=DeductionReducer())
+function solve_factoring(n::Int, m::Int, N::Int; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector =KNeighborSelector(1,1), measure=NumOfVertices()), reducer=NoReducer())
     # global BRANCHNUMBER = 0
     fproblem = Factoring(m, n, N)
     res = reduceto(CircuitSAT,fproblem)
-    ans,vals = solvebip(res.circuit; bsconfig, reducer)
+    ans,vals = solvesat(res.circuit; bsconfig, reducer)
     a, b = ProblemReductions.read_solution(fproblem, [vals[res.p]...,vals[res.q]...])
     @show ans
     # @show BRANCHNUMBER
@@ -37,6 +32,14 @@ function solve_factoring(n::Int, m::Int, N::Int; bsconfig::BranchingStrategy = B
 end
 
 function solve_sat(sat::ConstraintSatisfactionProblem)
-    res,vals = solvebip(sat)
+    res,vals = solvesat(sat)
     return res, Dict(zip(sat.symbols,vals))
+end
+
+function solvebip(bip::BooleanInferenceProblem; bsconfig::BranchingStrategy = BranchingStrategy(table_solver = TNContractionSolver(), selector = KNeighborSelector(1,1), measure=NumOfVertices()), reducer=NoReducer())
+    bs = initialize_branching_status(bip)
+    bs = deduction_reduce(bip,bs,collect(1:length(bip.he2v)))
+    ns,res,count_num = branch_and_reduce(bip,bs, bsconfig, reducer)
+    @show count_num
+    return ns,get_answer(res,bip.literal_num)
 end

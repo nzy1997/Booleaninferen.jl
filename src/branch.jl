@@ -12,6 +12,9 @@ function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem
     tbl = branching_table(problem,bs, config.table_solver, subbip)      # compute the BranchingTable
     iszero(tbl.bit_length) && return false,bs,1
 
+    @show count_ones(bs.decided_mask)
+    @show length(tbl.table)
+    @show length(subbip.vs)
     result = optimal_branching_rule(tbl, subbip.vs, bs,problem, config.measure, config.set_cover_solver)  # compute the optimal branching rule
     for branch in result.optimal_rule.clauses
         res, bs_new ,count_num1= branch_and_reduce(problem, apply_branch(problem,bs, branch, subbip.vs), config, reducer)
