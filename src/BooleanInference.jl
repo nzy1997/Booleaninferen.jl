@@ -1,5 +1,7 @@
 module BooleanInference
 
+using JuMP
+using HiGHS
 using TropicalNumbers
 using SparseArrays
 using OptimalBranchingCore
@@ -34,6 +36,9 @@ export TNContractionSolver
 # readcnf
 export readcnf,solvecnf
 
+# tropicalsvd
+export tropical_svd
+
 include("status.jl")
 include("stride.jl")
 include("types.jl")
@@ -43,4 +48,5 @@ include("selector.jl")
 include("tablesolver.jl")
 include("branch.jl")
 include("readcnf.jl")
+include("tropicalsvd.jl")
 end
