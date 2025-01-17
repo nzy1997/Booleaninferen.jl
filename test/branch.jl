@@ -36,6 +36,7 @@ end
 end
 
 @testset "interface" begin
-    solve_factoring(8, 8, 1019 * 1021; bsconfig = BranchingStrategy(; table_solver= TNContractionSolver(), selector=KNeighborSelector(1, 1), measure=NumOfDegrees()), reducer= NoReducer())
-    solve_factoring(5, 5, 899; bsconfig = BranchingStrategy(; table_solver= TNContractionSolver(), selector=KNeighborSelector(1, 1), measure=NumOfDegrees()), reducer= NoReducer())
+	bs = BranchingStrategy(;table_solver = TNContractionSolver(), selector = KNeighborSelector(1, 2), measure = NumOfVertices())
+    solve_factoring(8, 8, 31 * 29; bsconfig = bs)
+	solve_factoring(8, 8, 31 * 29)
 end

@@ -2,6 +2,8 @@ function OptimalBranchingCore.apply_branch(p::BooleanInferenceProblem, bs::Abstr
     bs_new, aedges = decide_literal(bs,p, vertices, clause)
     return deduction_reduce(p, bs_new, aedges)
 end
+get_clauses(results::OptimalBranchingResult) = results.optimal_rule.clauses
+get_clauses(res::AbstractArray) = res
 
 function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem, bs::AbstractBranchingStatus,config::BranchingStrategy, reducer::AbstractReducer)
     stopped, res,count_num = check_stopped(bs)
@@ -12,11 +14,8 @@ function OptimalBranchingCore.branch_and_reduce(problem::BooleanInferenceProblem
     tbl = branching_table(problem,bs, config.table_solver, subbip)      # compute the BranchingTable
     iszero(tbl.bit_length) && return false,bs,1
 
-    @show count_ones(bs.decided_mask)
-    @show length(tbl.table)
-    @show length(subbip.vs)
     result = optimal_branching_rule(tbl, subbip.vs, bs,problem, config.measure, config.set_cover_solver)  # compute the optimal branching rule
-    for branch in result.optimal_rule.clauses
+    for branch in get_clauses(result)
         res, bs_new ,count_num1= branch_and_reduce(problem, apply_branch(problem,bs, branch, subbip.vs), config, reducer)
         count_num += count_num1
         if res
@@ -63,4 +62,12 @@ function mybranch_and_reduce(problem::BooleanInferenceProblem, bs::AbstractBranc
     end
 
     return false, bs
+end
+
+struct NaiveSetCoverSolver <: AbstractSetCoverSolver
+end
+function OptimalBranchingCore.optimal_branching_rule(table::BranchingTable, variables::Vector, bs::AbstractBranchingStatus,p::BooleanInferenceProblem, m::AbstractMeasure, solver::NaiveSetCoverSolver)
+    candidates = collect(candidate_clauses(table))
+    size_reductions = [measure(bs, m) - measure((apply_branch(p,bs, candidate, variables)), m) for candidate in candidates]
+    return candidates[sortperm(size_reductions)]
 end
