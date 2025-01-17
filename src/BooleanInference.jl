@@ -11,6 +11,9 @@ using GenericTensorNetworks
 using GenericTensorNetworks.OMEinsum
 import ProblemReductions
 import ProblemReductions: CircuitSAT,Circuit,Factoring,reduceto
+using SparseArrays
+using KaHyPar
+
 
 # using GenericTensorNetworks: ∧, ∨, ¬
 
